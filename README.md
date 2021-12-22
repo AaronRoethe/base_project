@@ -1,7 +1,7 @@
 # Project Skeleton
 
 # Ojective 
-The goal is to create an easy-to-use template based on my experience developing analytic-based automation and reporting.
+The goal is to create an easy-to-use template based on my experience developing analytics-based automation and reporting.
 
 # Setup
 Change venv and project variables inside 
