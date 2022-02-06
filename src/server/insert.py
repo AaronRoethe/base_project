@@ -1,7 +1,5 @@
 from datetime import datetime
-import pandas as pd
 import pyodbc
-import numpy as np
 import time
 
 from datetime import date
@@ -53,70 +51,40 @@ class MyDfInsert:
             crsr = self._cnxn.cursor()
             crsr.execute(self._sql, params)
 
-def batch_insert(servername, database, campaign_history, load_date, load):
+def batch_insert(servername, database, table, load):
     if input("""
-           y -> Insert
-           n -> Exit 
-    enter: """) == 'y':
+            y -> Insert
+            n -> Exit 
+        enter: """) == 'y':
         pass
     else:
         raise SystemExit
-    ### Remove yesterday's file ###
-    remove=f'''
-            DELETE
-            FROM [DWWorking].[dbo].[Call_Campaign]
-            WHERE Load_Date < '{campaign_history}'
-            OR Load_Date = '{load_date}'
-            '''
-    add =   """
-            INSERT INTO DWWorking.dbo.Call_Campaign (
-            OutreachID, PhoneNumber, Score, Skill, Daily_Groups, Unique_Phone, Load_Date) 
-            """
-    ### Load file ###
-    columm = load
-    ### Clean ###
-    df = columm[['OutreachID', 'PhoneNumber', 'Score', 'Skill', 'Daily_Groups','Unique_Phone','Load_Date']]
-    df['PhoneNumber'] = df['PhoneNumber'].astype(str)
 
-    df = df[df['Daily_Groups'] != '0'] ### remove skill that are out of daily proccess
-    df = df.fillna(0)
-    df[['OutreachID', 'Score', 'Unique_Phone']] = df[['OutreachID', 'Score', 'Unique_Phone']].astype(np.int64)
-    df['Daily_Groups'] = df['Daily_Groups'].astype('datetime64[ns]')
-    df['Load_Date'] = df['Load_Date'].astype('datetime64[ns]')
+    ### Load file ###
+    columns = load.columns
+    
+    for i in columns:
+        try:
+            clean_columns = clean_columns + ", " + i
+        except:
+            clean_columns = i
+
+    add =   f"""
+            INSERT INTO {table} ({clean_columns}) 
+            """
 
     ### Server Location ###
-    conn_str = (f"""
-                DRIVER={{SQL Server}};
-                SERVER={servername}; 
-                DATABASE={database}; 
-                Trusted_Connection=yes
-                """)
-    cnxn = pyodbc.connect(conn_str, autocommit=True)
-    crsr = cnxn.cursor()
-    ### Remove yesterday's file ###
-    crsr.execute(remove)
+    cnxn = pyodbc.connect(f"""
+        DRIVER={{SQL Server}};
+        SERVER={servername}; 
+        DATABASE={database}; 
+        Trusted_Connection=yes""", 
+        autocommit=True)
 
     t0 = time.time()
-    ### Add today's file ###
-    MyDfInsert(cnxn, add, df, rows_per_batch=250)
+
+    MyDfInsert(cnxn, add, load, rows_per_batch=250)
 
     print()
     print(f'Inserts completed in {time.time() - t0:.2f} seconds.')
-
     cnxn.close()
-
-if __name__ == "__main__":
-    import sys  
-    from pathlib import Path  
-    file = Path(__file__).resolve()  
-    package_root_directory = file.parents[1]  
-    sys.path.append(str(package_root_directory))
-
-    from pipeline.tables import tables
-    from pipeline.etc import next_business_day, x_Bus_Day_ago
-    date_format = '%Y-%m-%d'
-    today = date.today()
-    tomorrow = next_business_day(today)
-    tomorrow_str = tomorrow.strftime(date_format)
-    df = tables('pull','na', f'{tomorrow_str}.zip', Path('data/load'))
-    batch_insert(x_Bus_Day_ago(10).strftime(date_format), tomorrow_str,df)
