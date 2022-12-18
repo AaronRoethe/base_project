@@ -1,18 +1,10 @@
-# Project Skeleton
+# Project Template
 
-# Ojective 
-The goal is to create an easy-to-use template based on my experience developing analytics-based automation and reporting.
+# Objective 
+The goal is to create an easy-to-use CLI template for python scripts.
 
 # Setup
-Change venv and project variables inside 
-- run.bat
-- setup.bat
+- add cli tools to configs/install.json
+- add packages to requirements.txt
 
-Once you've installed all dependencies for the project run:
-``` cmd
-call conda env export > environment.yml
-```
-Now when someone else wants to try out your project they can run:
-```cmd
-setup.bat
-```
+- `python3 src/main.py -f test.json --dryrun`
