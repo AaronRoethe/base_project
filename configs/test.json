@@ -1,0 +1,32 @@
+{
+    "client": {
+        "name": "test",
+        "system": "generic",
+        "keyvaults": {
+            "useDefault": true,
+            "additionalEntries": []
+        },
+        "deployedEnvironments": [
+            {
+                "environment": "ag1",
+                "clientId": "739701FD-8B2C-4797-B8D6-0670CA3B43C3",
+                "location": "ag1.com"
+            },
+            {
+                "environment": "us2",
+                "clientId": "6DCF5BC8-4723-4B39-9CE6-9FBC602BC5F0",
+                "location": "st.com"
+            },
+            {
+                "environment": "us1",
+                "clientId": "F43D8CCC-0F3E-443E-BBBD-90620A39A248",
+                "location": "us1.com",
+                "accessControlList":
+                [
+                    "192.168.0.1",
+                    "192.168.0.2"
+                ]
+            }
+        ]
+    }
+}
